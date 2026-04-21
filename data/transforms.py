@@ -1,15 +1,19 @@
 """Preprocesado homogéneo compartido por todos los datasets y modelos."""
 
 import torchvision.transforms as T
+from torchvision.models import ResNet50_Weights
 
-# Estadísticas de normalización estándar ImageNet (RGB)
-IMAGENET_MEAN: list[float] = [0.485, 0.456, 0.406]
-IMAGENET_STD: list[float] = [0.229, 0.224, 0.225]
+# Media y std extraídas directamente de los metadatos de los pesos IMAGENET1K_V2
+# Todos los modelos preentrenados en ImageNet comparten estos valores.
+_imagenet_meta = ResNet50_Weights.IMAGENET1K_V2.transforms()
+IMAGENET_MEAN: list[float] = list(_imagenet_meta.mean)
+IMAGENET_STD: list[float] = list(_imagenet_meta.std)
 
 INPUT_SIZE: int = 224
 
-# Probabilidad de aplicar GaussianBlur durante el entrenamiento.
-# Wang et al. (2020) muestran que blur + JPEG mejoran la generalización cross-generator.
+# GaussianBlur destruye artefactos espectrales de alta frecuencia propios de cada GAN.
+# Sin él, el detector aprende firmas específicas del generador de train y no generaliza.
+# Fuente: Wang (2020)"CNN-generated images are surprisingly easy to spot"
 _BLUR_PROB: float = 0.5
 _BLUR_KERNEL: int = 3
 
