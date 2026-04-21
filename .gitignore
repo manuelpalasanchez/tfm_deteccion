@@ -1,0 +1,9 @@
+.venv/
+data/datasets/
+experiments/
+*.pth
+*.pyc
+__pycache__/
+.env
+wandb/
+TFM_especificacion_tecnica.md

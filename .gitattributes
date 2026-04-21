@@ -1,0 +1,6 @@
+# Normaliza todos los ficheros de texto a LF en el repo (compatible con Colab/Linux)
+* text=auto eol=lf
+*.py text eol=lf
+*.yaml text eol=lf
+*.txt text eol=lf
+*.md text eol=lf
