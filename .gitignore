@@ -8,5 +8,9 @@ __pycache__/
 wandb/
 TFM_especificacion_tecnica.md
 ESTADO.md
-
+EXPLICACION.md
+.claude
 scripts/
+freqnet_visualization.ipynb
+.vscode/
+freqnet_pipeline.png
