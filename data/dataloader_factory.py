@@ -7,7 +7,7 @@ from data.base_dataset import BaseDataset
 
 logger = logging.getLogger(__name__)
 
-_DATASET_REGISTRO: dict[str, type[BaseDataset]] = {}
+_DATASET_REGISTRY: dict[str, type[BaseDataset]] = {}
 
 
 def register_dataset(name: str):
@@ -16,11 +16,11 @@ def register_dataset(name: str):
     ValueError: Si name ya está registrado.
     """
     def decorator(cls: type[BaseDataset]) -> type[BaseDataset]:
-        if name in _DATASET_REGISTRO:
+        if name in _DATASET_REGISTRY:
             raise ValueError(
-                f"Dataset '{name}' ya registrado por {_DATASET_REGISTRO[name].__qualname__}."
+                f"Dataset '{name}' ya registrado por {_DATASET_REGISTRY[name].__qualname__}."
             )
-        _DATASET_REGISTRO[name] = cls
+        _DATASET_REGISTRY[name] = cls
         logger.debug("Dataset registrado: '%s' -> %s", name, cls.__qualname__)
         return cls
 
@@ -48,14 +48,14 @@ def build_dataloader(
     Devuelve Dataloader
     ValueError: Si dataset_name no está registrado.
     """
-    if dataset_name not in _DATASET_REGISTRO:
-        available = sorted(_DATASET_REGISTRO.keys())
+    if dataset_name not in _DATASET_REGISTRY:
+        available = sorted(_DATASET_REGISTRY.keys())
         raise ValueError(
             f"Dataset '{dataset_name}' no encontrado en el registry. "
             f"Disponibles: {available}"
         )
 
-    dataset: BaseDataset = _DATASET_REGISTRO[dataset_name](
+    dataset: BaseDataset = _DATASET_REGISTRY[dataset_name](
         root=root, split=split, transform=transform
     )
     logger.info(
@@ -73,4 +73,4 @@ def build_dataloader(
 
 def list_datasets() -> list[str]:
     """Devuelve los nombres de todos los datasets registrados, ordenados."""
-    return sorted(_DATASET_REGISTRO.keys())
+    return sorted(_DATASET_REGISTRY.keys())

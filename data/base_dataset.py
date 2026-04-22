@@ -12,13 +12,14 @@ class BaseDataset(ABC, Dataset):
 
     @abstractmethod
     def __len__(self) -> int:
-        """Número total de muestras en el split."""
+        """Para len(dataset) - Número total de muestras en el split."""
         ...
 
     @abstractmethod
     def __getitem__(self, idx: int) -> tuple:
-        """Devuelve (imagen_tensor, etiqueta_int, generador_str).
-
+        
+        """Para dataset[idx]
+        Devuelve (imagen_tensor, etiqueta_int, generador_str).
         La etiqueta sigue la convención 0 = real, 1 = sintético.
         El campo generador_str identifica el modelo generativo de origen
         (o "real" para muestras auténticas), lo que permite al evaluador

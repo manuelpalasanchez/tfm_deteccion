@@ -7,3 +7,6 @@ __pycache__/
 .env
 wandb/
 TFM_especificacion_tecnica.md
+ESTADO.md
+
+scripts/
