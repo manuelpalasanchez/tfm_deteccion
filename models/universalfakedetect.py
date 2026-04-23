@@ -32,6 +32,8 @@ class UniversalFakeDetectDetector(BaseDetector):
         nn.init.normal_(self.fc.weight, mean=0.0, std=0.02)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # get_image_features retorna BaseModelOutputWithPooling en transformers 5.x;
+        # pooler_output contiene los features proyectados [B, projection_dim]
         features = self.model.get_image_features(pixel_values=x).pooler_output
         return self.fc(features)
 

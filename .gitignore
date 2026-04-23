@@ -9,8 +9,11 @@ wandb/
 TFM_especificacion_tecnica.md
 ESTADO.md
 EXPLICACION.md
-.claude
-scripts/
+.cla*
+scripts/smoke*
+scripts/run*
+indicaciones.md
 freqnet_visualization.ipynb
 .vscode/
 freqnet_pipeline.png
+.pytest_cache/

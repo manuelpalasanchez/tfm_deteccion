@@ -71,6 +71,24 @@ def build_dataloader(
     )
 
 
+def build_dataset(
+    dataset_name: str,
+    root: str,
+    split: str,
+    transform,
+) -> BaseDataset:
+    """Instancia el dataset registrado sin envolver en DataLoader.
+    Util cuando se quiere aplicar Subset antes de construir el DataLoader.
+    """
+    if dataset_name not in _DATASET_REGISTRY:
+        available = sorted(_DATASET_REGISTRY.keys())
+        raise ValueError(
+            f"Dataset '{dataset_name}' no encontrado en el registry. "
+            f"Disponibles: {available}"
+        )
+    return _DATASET_REGISTRY[dataset_name](root=root, split=split, transform=transform)
+
+
 def list_datasets() -> list[str]:
     """Devuelve los nombres de todos los datasets registrados, ordenados."""
     return sorted(_DATASET_REGISTRY.keys())
