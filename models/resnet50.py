@@ -17,12 +17,12 @@ class ResNet50Detector(BaseDetector):
     def __init__(self, pretrained: bool = True):
         super().__init__()
         weights = ResNet50_Weights.IMAGENET1K_V2 if pretrained else None
-        backbone = resnet50(weights=weights)
-        backbone.fc = nn.Linear(backbone.fc.in_features, 1) #sustitucion de la ultima capa por una de salida binaria
-        self.backbone = backbone
+        model = resnet50(weights=weights)
+        model.fc = nn.Linear(model.fc.in_features, 1) #sustitucion de la ultima capa por una de salida binaria
+        self.model = model
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.backbone(x)
+        return self.model(x)
 
     def preprocess(self, x: torch.Tensor) -> torch.Tensor:
         # La normalizacion ImageNet ya se aplica en transforms.py

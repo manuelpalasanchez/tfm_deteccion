@@ -18,7 +18,7 @@ class ViTDetector(BaseDetector):
         super().__init__()
         model_name = "google/vit-base-patch16-224"
         if pretrained:
-            self.vit = ViTForImageClassification.from_pretrained(
+            self.model = ViTForImageClassification.from_pretrained(
                 model_name,
                 num_labels=1,
                 ignore_mismatched_sizes=True,  # cabeza (fc) original tiene 1000 clases
@@ -26,10 +26,10 @@ class ViTDetector(BaseDetector):
         else:
             config = ViTConfig.from_pretrained(model_name)
             config.num_labels = 1
-            self.vit = ViTForImageClassification(config)
+            self.model = ViTForImageClassification(config)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.vit(pixel_values=x).logits
+        return self.model(pixel_values=x).logits
 
     def preprocess(self, x: torch.Tensor) -> torch.Tensor:
         # La normalizacion ImageNet ya se aplica en transforms.py
