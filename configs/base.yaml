@@ -8,8 +8,8 @@ model:
 # Configuracion de entrenamiento (epochs, tamaños de lote, 
 #tasa de aprendizaje, optimizador, funcion de perdida y scheduler)
 training:
-  epochs: 10
-  batch_size: 32
+  epochs: 5 #antes 10
+  batch_size: 128 #antes 32
   lr: 1.0e-4
   optimizer: adam
   loss: bce_with_logits
