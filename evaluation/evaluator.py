@@ -121,6 +121,11 @@ class Evaluator:
 
         all_metrics["e1"] = self._eval_round("e1", dcfg.eval_e1)
 
+        if getattr(dcfg.eval_e1b, "enabled", False):
+            all_metrics["e1b"] = self._eval_round("e1b", dcfg.eval_e1b)
+        else:
+            logger.info("E1b deshabilitada en config (eval_e1b.enabled=false).")
+
         if getattr(dcfg.eval_e2, "enabled", False):
             all_metrics["e2"] = self._eval_round("e2", dcfg.eval_e2)
         else:

@@ -40,6 +40,13 @@ data:
     split: test
     root: data/datasets/cnndetection
 
+  # E1b- Evaluacion cross-architecture (CNN_synth_testset: StyleGAN, BigGAN, CycleGAN, etc.)
+  eval_e1b:
+    dataset: cnndetection
+    split: test
+    root: data/datasets/CNN_synth_testset
+    enabled: false
+
   # E2- Evaluacion cross-generator; AUC-ROC como metrica principal
   eval_e2:
     dataset: genimage
