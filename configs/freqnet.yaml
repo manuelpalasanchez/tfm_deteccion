@@ -1,0 +1,6 @@
+# FreqNet 
+_base_: base.yaml
+
+model:
+  name: freqnet
+  kwargs: {}   

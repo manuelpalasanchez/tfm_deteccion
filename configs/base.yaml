@@ -1,0 +1,69 @@
+# Configuracion base heredada por todos los configs de modelo.
+
+#Nombre y argumentos a sobreescribir
+model:
+  name: ~        
+  kwargs: {}     # Args del constructor; se pasan como **kwargs a model_registry.build()
+
+# Configuracion de entrenamiento (epochs, tamaños de lote, 
+#tasa de aprendizaje, optimizador, funcion de perdida y scheduler)
+training:
+  epochs: 10
+  batch_size: 32
+  lr: 1.0e-4
+  optimizer: adam
+  loss: bce_with_logits
+
+  scheduler:
+    name: cosine_annealing #hace que la lr baje siguiendo curva de coseno hasta eta_min a lo largo de T_max iteraciones
+    T_max: 10    # Igual a las epoch para que cubra todo el entrenamiento
+    eta_min: 0.0
+
+#Define los slots de datos
+data:
+  # Entrenamiento 
+  train:
+    dataset: cnndetection
+    split: train
+    root: data/datasets/cnndetection
+    # Ruta en Colab: /content/drive/MyDrive/tfm-data/cnndetection
+
+  # Validacion durante el entrenamiento 
+  val:
+    dataset: cnndetection
+    split: val
+    root: data/datasets/cnndetection
+
+  # E1- Evaluacion in-distribution (split test de CNNDetection)
+  eval_e1:
+    dataset: cnndetection
+    split: test
+    root: data/datasets/cnndetection
+
+  # E2- Evaluacion cross-generator; AUC-ROC como metrica principal
+  eval_e2:
+    dataset: genimage
+    split: val
+    root: data/datasets/genimage
+    enabled: false
+
+  # E3- Evaluacion fuera de dominio opcional
+  eval_e3:
+    dataset: faceforensics
+    split: test
+    root: data/datasets/faceforensics
+    compression: c23    # Niveles disponibles: raw / c23 / c40; c23 es el estandar segun spec
+    enabled: false      # Cambiar a true solo cuando el dataset este disponible
+
+  input_size: 224       # INPUT_SIZE en transforms.py
+  num_workers: 4        # Procesos paralelos para cargar en CPU
+  pin_memory: true      # Acelera la transferencia CPU->GPU; inofensivo sin GPU
+
+output:
+  base_dir: experiments/runs    # Subcarpeta por run: {model_name}_{timestamp}
+  save_best: true               # checkpoint_best.pth segun AUC en E1
+
+wandb:
+  enabled: true
+  project: tfm_deteccion
+  entity: ~   

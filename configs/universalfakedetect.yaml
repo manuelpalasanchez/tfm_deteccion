@@ -1,0 +1,12 @@
+# UniversalFakeDetect 
+_base_: base.yaml
+
+model:
+  name: universalfakedetect
+  kwargs:
+    pretrained: true    
+
+training:
+  # lr mas alto  porque el backbone esta congelado y solo se actualiza
+  # la cabeza lineal, lo que equivale a una regresion logistica sobre features fijas.
+  lr: 1.0e-3

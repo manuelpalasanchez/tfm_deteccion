@@ -1,0 +1,11 @@
+# ViT-B/16
+_base_: base.yaml
+model:
+  name: vit
+  kwargs:
+    pretrained: true
+
+training:
+  # Reducir 5e-5 si el AUC de validacion oscila o se estanca en las primeras epocas.
+  lr: 1.0e-4
+
