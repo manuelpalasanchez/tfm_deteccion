@@ -1,6 +1,7 @@
 """Evaluador: corre inferencia y guarda metricas y graficas por ronda."""
 
 import logging
+import random
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -70,7 +71,11 @@ class Evaluator:
         )
         max_samples = getattr(dcfg, "max_samples", None)
         if max_samples and len(dataset) > max_samples:
-            dataset = Subset(dataset, list(range(max_samples)))
+            # Muestreo aleatorio con semilla fija: evita sesgo por orden de disco
+            # (el scan agrupa por categoria/label y coger range(N) da bloques homogeneos)
+            rng = random.Random(42)
+            indices = rng.sample(range(len(dataset)), max_samples)
+            dataset = Subset(dataset, indices)
 
         num_workers = getattr(self.cfg.data, "num_workers", 0)
         pin_memory = getattr(self.cfg.data, "pin_memory", True)

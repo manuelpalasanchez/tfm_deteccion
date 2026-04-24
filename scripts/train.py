@@ -5,6 +5,7 @@ Uso: python scripts/train.py --config configs/resnet50.yaml
 import argparse
 import importlib
 import logging
+import random
 import shutil
 import sys
 from datetime import datetime
@@ -52,8 +53,12 @@ def _make_loader(
 
     max_samples = getattr(dcfg, "max_samples", None)
     if max_samples is not None and len(dataset) > max_samples:
-        dataset = Subset(dataset, list(range(max_samples)))
-        logger.info("Subset aplicado: %d muestras", max_samples)
+        # Muestreo aleatorio con semilla fija: evita sesgo por orden de disco
+        # (el scan agrupa por categoria/label y range(N) da bloques homogeneos).
+        rng = random.Random(42)
+        indices = rng.sample(range(len(dataset)), max_samples)
+        dataset = Subset(dataset, indices)
+        logger.info("Subset aleatorio aplicado: %d muestras (seed=42)", max_samples)
 
     return DataLoader(
         dataset,
