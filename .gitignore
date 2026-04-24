@@ -11,7 +11,7 @@ ESTADO.md
 EXPLICACION.md
 .cla*
 scripts/smoke*
-scripts/run*
+scripts/run_all.py
 indicaciones.md
 freqnet_visualization.ipynb
 .vscode/
