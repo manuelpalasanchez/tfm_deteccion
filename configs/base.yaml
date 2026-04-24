@@ -8,8 +8,8 @@ model:
 # Configuracion de entrenamiento (epochs, tamaños de lote, 
 #tasa de aprendizaje, optimizador, funcion de perdida y scheduler)
 training:
-  epochs: 5 #antes 10
-  batch_size: 128 #antes 32
+  epochs: 8
+  batch_size: 128
   lr: 1.0e-4
   optimizer: adam
   loss: bce_with_logits
@@ -26,9 +26,8 @@ data:
     dataset: cnndetection
     split: train
     root: data/datasets/cnndetection
-    # Ruta en Colab: /content/drive/MyDrive/tfm-data/cnndetection
 
-  # Validacion durante el entrenamiento 
+  # Validacion durante el entrenamiento
   val:
     dataset: cnndetection
     split: val

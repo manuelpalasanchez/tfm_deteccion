@@ -34,18 +34,20 @@ _MODEL_MODULES = {
 }
 
 
-def _load_config(config_path: Path) -> SimpleNamespace:
+def _load_raw(config_path: Path) -> dict:
+    """Carga un YAML resolviendo herencia via _base_ de forma recursiva."""
     with config_path.open() as f:
         raw: dict = yaml.safe_load(f)
-
     base_key = raw.pop("_base_", None)
     if base_key:
-        with (config_path.parent / base_key).open() as f:
-            base = yaml.safe_load(f)
+        base = _load_raw(config_path.parent / base_key)
         _deep_merge(base, raw)
-        raw = base
+        return base
+    return raw
 
-    return _dict_to_namespace(raw)
+
+def _load_config(config_path: Path) -> SimpleNamespace:
+    return _dict_to_namespace(_load_raw(config_path))
 
 
 def _deep_merge(base: dict, override: dict) -> None:
