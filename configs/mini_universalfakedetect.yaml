@@ -1,0 +1,44 @@
+_base_: base.yaml
+
+model:
+  name: universalfakedetect
+  kwargs:
+    pretrained: true
+
+training:
+  epochs: 2
+  batch_size: 32
+  lr: 1.0e-3            # backbone congelado: lr mas alto segun especificacion
+  scheduler:
+    T_max: 2
+
+data:
+  train:
+    dataset: cnndetection
+    split: train
+    root: /content/cnndetection
+    max_samples: 2000
+  val:
+    dataset: cnndetection
+    split: val
+    root: /content/cnndetection
+    max_samples: 500
+  eval_e1:
+    dataset: cnndetection
+    split: val
+    root: /content/cnndetection
+    max_samples: 500
+  eval_e1b:
+    enabled: false
+  eval_e2:
+    enabled: false
+  eval_e3:
+    enabled: false
+  num_workers: 2
+  pin_memory: true
+
+output:
+  base_dir: /content/drive/MyDrive/tfm-checkpoints-mini
+
+wandb:
+  enabled: false

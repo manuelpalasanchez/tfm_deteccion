@@ -87,8 +87,3 @@ def build_dataset(
             f"Disponibles: {available}"
         )
     return _DATASET_REGISTRY[dataset_name](root=root, split=split, transform=transform)
-
-
-def list_datasets() -> list[str]:
-    """Devuelve los nombres de todos los datasets registrados, ordenados."""
-    return sorted(_DATASET_REGISTRY.keys())

@@ -10,15 +10,14 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
-import torch
-import yaml
 from torch.utils.data import DataLoader, Subset
 sys.path.insert(0, str(Path(__file__).parent.parent))
-import data.cnndetection_dataset  
+import data.cnndetection_dataset
 from data.dataloader_factory import build_dataset
 from data.transforms import get_eval_transforms, get_train_transforms
 from models import model_registry
 from training.trainer import Trainer
+from utils.config import load_config
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,40 +33,6 @@ _MODEL_MODULES = {
     "vit": "models.vit",
     "universalfakedetect": "models.universalfakedetect",
 }
-
-
-def _load_raw(config_path: Path) -> dict:
-    """Carga un YAML resolviendo herencia via _base_ de forma recursiva."""
-    with config_path.open() as f:
-        raw: dict = yaml.safe_load(f)
-    base_key = raw.pop("_base_", None)
-    if base_key:
-        base = _load_raw(config_path.parent / base_key)
-        _deep_merge(base, raw)
-        return base
-    return raw
-
-
-def _load_config(config_path: Path) -> SimpleNamespace:
-    return _dict_to_namespace(_load_raw(config_path))
-
-
-def _deep_merge(base: dict, override: dict) -> None:
-    """Fusiona override sobre base en profundidad (in-place)."""
-    for key, val in override.items():
-        if key in base and isinstance(base[key], dict) and isinstance(val, dict):
-            _deep_merge(base[key], val)
-        else:
-            base[key] = val
-
-
-def _dict_to_namespace(d) -> SimpleNamespace:
-    if not isinstance(d, dict):
-        return d
-    ns = SimpleNamespace()
-    for k, v in d.items():
-        setattr(ns, k, _dict_to_namespace(v) if isinstance(v, dict) else v)
-    return ns
 
 
 def _make_loader(
@@ -104,7 +69,7 @@ def main() -> None:
     parser.add_argument("--config", required=True, type=Path)
     args = parser.parse_args()
 
-    cfg = _load_config(args.config)
+    cfg = load_config(args.config)
 
     model_name = cfg.model.name
     if model_name not in _MODEL_MODULES:
