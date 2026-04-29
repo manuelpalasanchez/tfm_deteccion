@@ -13,9 +13,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 
+# FreqNet en stand-by para la prueba final: se entrena desde cero y necesita
+# mucho mas computo del que tenemos para llegar a un AUC competitivo. Volvera
+# si hay margen tras consolidar los resultados de los otros tres.
 CONFIGS = [
     "configs/resnet50.yaml",
-    "configs/freqnet.yaml",
     "configs/vit.yaml",
     "configs/universalfakedetect.yaml",
 ]

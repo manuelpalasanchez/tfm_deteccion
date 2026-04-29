@@ -53,14 +53,6 @@ data:
     root: data/datasets/genimage
     enabled: false
 
-  # E3- Evaluacion fuera de dominio opcional
-  eval_e3:
-    dataset: faceforensics
-    split: test
-    root: data/datasets/faceforensics
-    compression: c23    # Niveles disponibles: raw / c23 / c40; c23 es el estandar segun spec
-    enabled: false      # Cambiar a true solo cuando el dataset este disponible
-
   input_size: 224       # INPUT_SIZE en transforms.py
   num_workers: 4        # Procesos paralelos para cargar en CPU
   pin_memory: true      # Acelera la transferencia CPU->GPU; inofensivo sin GPU

@@ -3,10 +3,10 @@ from torch.utils.data import Dataset
 
 
 class BaseDataset(ABC, Dataset):
-    """Interfaz común para CNNDetection, FaceForensics++ y GenImage.
+    """Interfaz comun para los datasets de deteccion (CNNDetection, GenImage).
 
     Las subclases deben implementar __len__, __getitem__ y generators.
-    La propiedad generators permite al evaluador segmentar métricas por modelo
+    La propiedad generators permite al evaluador segmentar metricas por modelo
     generativo sin acoplar el evaluador a cada dataset concreto.
     """
 
