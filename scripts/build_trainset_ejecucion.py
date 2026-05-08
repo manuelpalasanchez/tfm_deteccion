@@ -20,6 +20,7 @@ CNNDetectionDataset con split='train'.
 import argparse
 import json
 import random
+import shutil
 import zipfile
 from collections import defaultdict
 from pathlib import Path
@@ -56,6 +57,10 @@ def _index_zip(zip_path: Path) -> dict[tuple[str, str], list[zipfile.ZipInfo]]:
     return grouped
 
 
+def _free_gb(path: Path) -> float:
+    return shutil.disk_usage(path).free / 1024 ** 3
+
+
 def _extract(
     zip_path: Path,
     out_dir: Path,
@@ -63,18 +68,26 @@ def _extract(
 ) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     written = 0
+    cats = sorted({c for (c, _) in chosen.keys()})
+    n_cats = len(cats)
     with zipfile.ZipFile(zip_path) as zf:
-        for (cat, label), infos in chosen.items():
-            target = out_dir / cat / label
-            target.mkdir(parents=True, exist_ok=True)
-            for info in infos:
-                dest = target / Path(info.filename).name
-                if dest.exists():
-                    written += 1
-                    continue
-                with zf.open(info) as src, dest.open("wb") as dst:
-                    dst.write(src.read())
-                written += 1
+        for i, cat in enumerate(cats, 1):
+            cat_written = 0
+            for label in ("0_real", "1_fake"):
+                infos = chosen.get((cat, label), [])
+                target = out_dir / cat / label
+                target.mkdir(parents=True, exist_ok=True)
+                for info in infos:
+                    dest = target / Path(info.filename).name
+                    if dest.exists():
+                        cat_written += 1
+                        continue
+                    with zf.open(info) as src, dest.open("wb") as dst:
+                        dst.write(src.read())
+                    cat_written += 1
+            written += cat_written
+            free = _free_gb(out_dir)
+            print(f"  [{i:2d}/{n_cats}] {cat:<20} {cat_written:5d} imgs  |  total: {written:6d}  |  libre: {free:.1f} GB")
     return written
 
 
