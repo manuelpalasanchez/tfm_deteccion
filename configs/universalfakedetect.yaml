@@ -10,3 +10,8 @@ training:
   # lr mas alto  porque el backbone esta congelado y solo se actualiza
   # la cabeza lineal, lo que equivale a una regresion logistica sobre features fijas.
   lr: 1.0e-3
+  # CLIP-ViT-L/14 forward es lento (~80 min/epoch en T4 con N=100k); con la cabeza
+  # lineal sobre features fijas convergemos rapido, 3 epocas bastan.
+  epochs: 3
+  scheduler:
+    T_max: 3

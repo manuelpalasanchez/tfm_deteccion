@@ -8,4 +8,6 @@ model:
 training:
   # Reducir 5e-5 si el AUC de validacion oscila o se estanca en las primeras epocas.
   lr: 1.0e-4
+  # ViT-B/16 con 224x224 no entra en T4 (15 GB) a batch 128: OOM. 64 cabe holgado.
+  batch_size: 64
 
