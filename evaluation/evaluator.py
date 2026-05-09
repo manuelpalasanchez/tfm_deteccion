@@ -136,8 +136,9 @@ class Evaluator:
         else:
             logger.info("E2 deshabilitada en config (eval_e2.enabled=false).")
 
-        if getattr(dcfg.eval_e3, "enabled", False):
-            all_metrics["e3"] = self._eval_round("e3", dcfg.eval_e3)
+        eval_e3 = getattr(dcfg, "eval_e3", None)
+        if eval_e3 is not None and getattr(eval_e3, "enabled", False):
+            all_metrics["e3"] = self._eval_round("e3", eval_e3)
         else:
             logger.info("E3 deshabilitada en config (eval_e3.enabled=false).")
 
