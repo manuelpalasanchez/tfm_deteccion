@@ -1,5 +1,20 @@
 # Plan de ejecucion final - 2026-04-29
 
+> **Nota historica (anadida 2026-05-08)**: este plan describe la version
+> _inicial_ del experimento final, antes del descubrimiento del problema de
+> cache FUSE de Drive. El metodo de extraccion descrito aqui (zipfile sobre
+> el zip montado por FUSE) NO funciona en Colab Free; ver
+> `problema_carga_datasets.md` para el diagnostico completo y la solucion
+> adoptada (Drive API + streaming, `scripts/build_trainset_drive_api.py`).
+>
+> Las decisiones metodologicas de fondo (3 modelos, 20 cats, N=5000,
+> seed=42, val/test completos, hiperparametros) se mantienen, salvo dos
+> ajustes posteriores documentados en `ESTADO.md`:
+> - `vit.yaml`: `batch_size: 64` (era heredado 128 -> OOM en T4).
+> - `universalfakedetect.yaml`: `epochs: 3` (era 8 -> no cabe en sesion).
+>
+> Este documento se conserva como snapshot del razonamiento original.
+
 ## Contexto
 
 Tras la prueba mini del 2026-04-24 (pipeline validado e2e en Colab GPU,
