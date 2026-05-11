@@ -41,7 +41,12 @@ class CNNDetectionDataset(BaseDataset):
         self._scan()
 
     def _scan(self) -> None:
-        """Recorre el árbol de directorios y construye la lista de muestras"""
+        """Recorre el árbol de directorios y construye la lista de muestras.
+
+        Soporta dos estructuras de carpetas:
+        - Con categorías: {gen_dir}/{categoria}/0_real|1_fake/  (e.g. ProGAN, CycleGAN)
+        - Plana:          {gen_dir}/0_real|1_fake/              (e.g. BigGAN, DeepFake)
+        """
         generator_dirs = sorted(
             d for d in self._root.iterdir()
             if d.is_dir() and d.name.endswith(f"_{self._split}")
@@ -53,12 +58,17 @@ class CNNDetectionDataset(BaseDataset):
 
         for gen_dir in generator_dirs:
             generator = gen_dir.name.rsplit("_", 1)[0]
-            self._generator_list.append(generator) #progan
+            self._generator_list.append(generator)
 
-            for category_dir in sorted(gen_dir.iterdir()): #Carpetas de categorias
-                if not category_dir.is_dir():
-                    continue
+            # Estructura plana: 0_real/ y 1_fake/ directamente bajo gen_dir
+            is_flat = (gen_dir / _REAL_DIR).exists() or (gen_dir / _FAKE_DIR).exists()
+            if is_flat:
+                logger.debug("Estructura plana detectada para generador '%s'.", generator)
+                category_dirs = [gen_dir]
+            else:
+                category_dirs = sorted(d for d in gen_dir.iterdir() if d.is_dir())
 
+            for category_dir in category_dirs:
                 for label, subdir_name in ((_LABEL_REAL, _REAL_DIR), (_LABEL_FAKE, _FAKE_DIR)):
                     img_dir = category_dir / subdir_name
                     if not img_dir.exists():

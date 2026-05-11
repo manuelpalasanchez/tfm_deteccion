@@ -20,6 +20,11 @@ def compute_metrics(
 ) -> dict:
     """AUC-ROC, Average Precision y Accuracy al threshold dado."""
     preds = (scores >= threshold).astype(int)
+    try:
+        tn, fp, fn, tp = confusion_matrix(targets, preds).ravel()
+        cm_value = [[int(tn), int(fp)], [int(fn), int(tp)]]
+    except ValueError:
+        cm_value = None
     return {
         "auc_roc": float(roc_auc_score(targets, scores)),
         "average_precision": float(average_precision_score(targets, scores)),
@@ -27,6 +32,7 @@ def compute_metrics(
         "threshold": threshold,
         "n_samples": int(len(targets)),
         "n_positive": int(targets.sum()),
+        "confusion_matrix": cm_value,
     }
 
 
