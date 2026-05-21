@@ -45,22 +45,24 @@ class Evaluator:
         self.model.eval()
 
     @torch.no_grad()
-    def _run_inference(self, loader: DataLoader) -> tuple[np.ndarray, np.ndarray]:
-        """Devuelve (targets, scores) para todo el loader."""
+    def _run_inference(self, loader: DataLoader) -> tuple[np.ndarray, np.ndarray, list]:
+        """Devuelve (targets, scores, generators) para todo el loader."""
         all_scores: list[torch.Tensor] = []
         all_targets: list[torch.Tensor] = []
+        all_generators: list[str] = []
 
         for batch in tqdm(loader, desc="Inferencia", leave=False):
-            images, labels, _ = batch
+            images, labels, generators = batch
             images = self.model.preprocess(images.to(self.device))
             logits = self.model(images).squeeze(1)
             scores = torch.sigmoid(logits).cpu()
             all_scores.append(scores)
             all_targets.append(labels.float())
+            all_generators.extend(generators)
 
         targets = torch.cat(all_targets).numpy()
         scores = torch.cat(all_scores).numpy()
-        return targets, scores
+        return targets, scores, all_generators
 
     def _build_loader(self, dcfg: SimpleNamespace) -> DataLoader:
         dataset = build_dataset(
@@ -93,7 +95,7 @@ class Evaluator:
         """Corre una ronda de evaluacion y guarda metricas y graficas."""
         logger.info("Evaluando ronda %s (dataset=%s split=%s)...", round_name, dcfg.dataset, dcfg.split)
         loader = self._build_loader(dcfg)
-        targets, scores = self._run_inference(loader)
+        targets, scores, generators = self._run_inference(loader)
 
         metrics = compute_metrics(targets, scores)
         logger.info(
@@ -116,6 +118,17 @@ class Evaluator:
             self.output_dir / f"confusion_matrix_{round_name}.png",
             title=f"Confusion Matrix — {round_name.upper()}",
         )
+
+        if round_name == "e1b":
+            torch.save(
+                {
+                    "y_true":     torch.tensor(targets, dtype=torch.float32),
+                    "y_score":    torch.tensor(scores,  dtype=torch.float32),
+                    "generators": generators,
+                },
+                self.output_dir / "predictions_e1b.pt",
+            )
+            logger.info("Predicciones E1b guardadas en %s", self.output_dir / "predictions_e1b.pt")
 
         return metrics
 
