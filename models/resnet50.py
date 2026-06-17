@@ -18,7 +18,7 @@ class ResNet50Detector(BaseDetector):
         super().__init__()
         weights = ResNet50_Weights.IMAGENET1K_V2 if pretrained else None
         model = resnet50(weights=weights)
-        model.fc = nn.Linear(model.fc.in_features, 1) #sustitucion de la ultima capa por una de salida binaria
+        model.fc = nn.Linear(model.fc.in_features, 1)
         self.model = model
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

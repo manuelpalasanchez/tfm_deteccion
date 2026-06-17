@@ -20,3 +20,8 @@ problema_carga_datasets.md
 figuras.md
 contexto_temporal.md
 desglose*
+expEjecucionGenImage.md
+.ipynb_checkpoints/
+Thumbs.db
+*.egg-info/
+reports/

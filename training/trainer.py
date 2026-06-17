@@ -16,24 +16,30 @@ logger = logging.getLogger(__name__)
 class Trainer:
     """Bucle unificado: forward, loss, backprop, scheduler, checkpoint por AUC."""
 
-    def __init__(self, model: BaseDetector,train_loader: DataLoader, 
-                 val_loader: DataLoader, cfg, output_dir: Path) -> None:
-        
-        self.model = model #Modelo a entrenar
-        self.train_loader = train_loader #DataLoader para entrenamiento
-        self.val_loader = val_loader #DataLoader para validación
-        self.cfg = cfg #Configuracion
-        self.output_dir = output_dir #Directorio de salida
-        self.output_dir.mkdir(parents=True, exist_ok=True) 
+    def __init__(
+        self,
+        model: BaseDetector,
+        train_loader: DataLoader,
+        val_loader: DataLoader,
+        cfg,
+        output_dir: Path,
+    ) -> None:
+        self.model = model
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+        self.cfg = cfg
+        self.output_dir = output_dir
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") #Entrenar con GPU si está disponible
-        self.model.to(self.device) #Mover modelo a dispositivo donde se va a entrenar
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model.to(self.device)
 
-        tcfg = cfg.training #Configuración de entrenamiento
+        tcfg = cfg.training
         self.epochs = tcfg.epochs
-        self.optimizer = model.get_optimizer(lr=tcfg.lr) #Realmente no se usa el que venga en la config, se usa el que define cada modelo
-        self.criterion = get_lossFunction(tcfg.loss) 
-        self.scheduler = CosineAnnealingLR(self.optimizer,
+        self.optimizer = model.get_optimizer(lr=tcfg.lr)
+        self.criterion = get_lossFunction(tcfg.loss)
+        self.scheduler = CosineAnnealingLR(
+            self.optimizer,
             T_max=tcfg.scheduler.T_max,
             eta_min=getattr(tcfg.scheduler, "eta_min", 0.0),
         )
@@ -69,50 +75,33 @@ class Trainer:
         images = images.to(self.device)
         labels = labels.float().unsqueeze(1).to(self.device)
         return images, labels
-    
+
     def _forward_loss(self, images, labels):
         images = self.model.preprocess(images)
         logits = self.model(images)
-        loss = self.criterion(logits, labels)#Mide la perdida entre las predicciones (logits) y las etiquetas reales
+        loss = self.criterion(logits, labels)
         return logits, loss
 
     def _train_epoch(self, epoch: int) -> float:
-        """
-        Recorre el conjunto de entrenamiento por completo, actualizando los pesos del modelo.
-        Devuelve la perdida media por batch para este epoch.
-        """
+        """Devuelve la perdida media por batch."""
         self.model.train()
         total_loss = 0.0
         n_batches = 0
 
-        #Del conjunto de entrenamiento:
-        # - obtenemos batches de imagenes y etiquetas
-        # - los movemos al dispositivo
-        # - hacemos el forward 
-        # - calculamos la perdida 
-        # - hacemos backprop 
-        # - actualizamos los pesos
-        # Acumulamos la perdida para calcular el promedio al final del epoch.
         for batch in tqdm(self.train_loader, desc=f"Epoch {epoch} train", leave=False):
             images, labels = self._prepare_batch(batch)
-
             _, loss = self._forward_loss(images, labels)
-
-            # Backprop y optimizacion
             self.optimizer.zero_grad()
             loss.backward()
-            self.optimizer.step() #Actualiza los pesos del modelo usando el optimizador
-
+            self.optimizer.step()
             total_loss += loss.item()
             n_batches += 1
 
-        return total_loss / n_batches if n_batches else 0.0 #Devuelve la perdida media por batch para este epoch
+        return total_loss / n_batches if n_batches else 0.0
 
-    @torch.no_grad() #Desactiva gradientes, solo se hace forward para evaluar el modelo, no se actualizan pesos
+    @torch.no_grad()
     def _val_epoch(self, epoch: int) -> tuple[float, float]:
-        """
-        Evalua el modelo en el conjunto de validacion. Devuelve la perdida media y el AUC.
-        """
+        """Devuelve la perdida media y el AUC sobre el conjunto de validacion."""
         self.model.eval()
         all_logits: list[torch.Tensor] = []
         all_labels: list[torch.Tensor] = []
@@ -170,13 +159,15 @@ class Trainer:
 
         for epoch in range(1, self.epochs + 1):
             t0 = time.time()
-            train_loss = self._train_epoch(epoch) #Entrenamiento de una epoch completa
-            val_loss, val_auc = self._val_epoch(epoch) #Evaluacion en el conjunto de validacion
-            self.scheduler.step() #
-            elapsed = time.time() - t0  
+            train_loss = self._train_epoch(epoch)
+            val_loss, val_auc = self._val_epoch(epoch)
+            self.scheduler.step()
+            elapsed = time.time() - t0
 
             logger.info(
-                "Epoch %d/%d | train_loss=%.4f | val_loss=%.4f | val_auc=%.4f | %.1fs",epoch,self.epochs, train_loss, val_loss, val_auc, elapsed,)
+                "Epoch %d/%d | train_loss=%.4f | val_loss=%.4f | val_auc=%.4f | %.1fs",
+                epoch, self.epochs, train_loss, val_loss, val_auc, elapsed,
+            )
             self._log(
                 {
                     "epoch": epoch,
